@@ -1,4 +1,4 @@
-﻿export type Book = {
+export type Book = {
   id: string;
   title: string;
   slug: string;
@@ -9,6 +9,7 @@
   soldCount: number;
   cover: string;
   badge?: string;
+  categorySlug?: string;
 };
 
 export type Category = {

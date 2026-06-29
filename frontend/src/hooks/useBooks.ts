@@ -53,8 +53,12 @@ export function useBooks(params: UseBooksParams = {}): UseBooksResult {
       } catch (err) {
         console.error("useBooks: Không tải được sách", err);
         if (isMounted) {
+          const fallbackBooks = category && category !== "tat-ca"
+            ? demoBooks.filter((book) => book.categorySlug === category)
+            : demoBooks;
+
           setError("Chưa kết nối được API, đang hiển thị dữ liệu mẫu.");
-          setBooks(demoBooks.concat(demoBooks));
+          setBooks(fallbackBooks.concat(fallbackBooks));
         }
       } finally {
         if (isMounted) setIsLoading(false);

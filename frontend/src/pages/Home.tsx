@@ -1,4 +1,21 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  Baby,
+  BadgePercent,
+  BookOpen,
+  BriefcaseBusiness,
+  ChevronRight,
+  GraduationCap,
+  Grid3X3,
+  Languages,
+  PanelsTopLeft,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Truck,
+} from "lucide-react";
 import { BookCard } from "../components/shared/BookCard";
 import { demoBooks, categories as demoCategories } from "../data";
 import { getHomeData, type HomeBanner } from "../services/api";
@@ -15,23 +32,40 @@ type HomeState = {
 
 const fallbackHero: HomeBanner = {
   id: 0,
-  title: "Sách hay cho từng ngày, mua nhanh trong vài cú chạm.",
-  subtitle: "Khám phá sách bán chạy, sách mới và ưu đãi được chọn lọc cho bạn với trải nghiệm mua sách gọn gàng, ấm áp.",
-  imageUrl: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=900&q=80",
+  title: "Hiệu sách online ấm áp cho mọi hành trình đọc.",
+  subtitle:
+    "BBooks tuyển chọn sách hay, ưu đãi rõ ràng và trải nghiệm mua nhanh như một quầy sách premium ngay trong trình duyệt của bạn.",
+  imageUrl:
+    "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1100&q=85",
   linkUrl: "/books",
   buttonText: "Mua sách ngay",
   sortOrder: 0,
 };
 
-function SectionHeader({ title, eyebrow }: { title: string; eyebrow: string }) {
+const categoryIcons = [
+  BookOpen,
+  BriefcaseBusiness,
+  Sparkles,
+  Baby,
+  Languages,
+  PanelsTopLeft,
+  GraduationCap,
+  Grid3X3,
+];
+
+function SectionHeader({ title, eyebrow, description }: { title: string; eyebrow: string; description?: string }) {
   return (
-    <div className="flex items-end justify-between gap-5 mb-5">
+    <div className="mb-6 flex items-end justify-between gap-5">
       <div>
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-primary mb-1">{eyebrow}</p>
-        <h2 className="text-xl md:text-2xl font-bold text-espresso">{title}</h2>
+        <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-primary">{eyebrow}</p>
+        <h2 className="font-serif text-2xl text-espresso md:text-3xl">{title}</h2>
+        {description ? <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-sub">{description}</p> : null}
       </div>
-      <a href="/books" className="text-primary hover:text-primary-hover font-extrabold text-sm md:text-base transition-colors shrink-0">
-        Xem tất cả →
+      <a
+        href="/books"
+        className="hidden shrink-0 items-center gap-2 rounded-full border border-border-warm bg-white/80 px-4 py-2 text-sm font-extrabold text-primary shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-primary-hover md:inline-flex"
+      >
+        Xem tất cả <ArrowRight className="h-4 w-4" />
       </a>
     </div>
   );
@@ -41,10 +75,10 @@ function BookSlider({ title, eyebrow, books }: { title: string; eyebrow: string;
   if (books.length === 0) return null;
 
   return (
-    <section className="py-9 max-w-[1280px] w-[calc(100%-48px)] mx-auto">
-      <SectionHeader title={title} eyebrow={eyebrow} />
-      <div className="grid grid-flow-col auto-cols-[220px] md:auto-cols-[calc((100%-72px)/5)] gap-[18px] overflow-x-auto pb-4 snap-x snap-proximity no-scrollbar">
-        {books.slice(0, 5).map((book) => (
+    <section className="mx-auto w-[calc(100%-32px)] max-w-[1280px] py-9 md:w-[calc(100%-48px)]">
+      <SectionHeader title={title} eyebrow={eyebrow} description="Các tựa sách được sắp xếp thành hàng ngang để bạn lướt nhanh như kệ sách thật." />
+      <div className="grid auto-cols-[225px] grid-flow-col gap-[18px] overflow-x-auto pb-5 snap-x snap-proximity no-scrollbar md:auto-cols-[calc((100%-72px)/5)]">
+        {books.slice(0, 10).map((book) => (
           <div key={`${title}-${book.id}`} className="snap-start">
             <BookCard book={book} />
           </div>
@@ -56,72 +90,113 @@ function BookSlider({ title, eyebrow, books }: { title: string; eyebrow: string;
 
 function CategoryGrid({ categories, isLoading }: { categories: Category[]; isLoading: boolean }) {
   return (
-    <section id="categories" className="py-9 max-w-[1280px] w-[calc(100%-48px)] mx-auto">
+    <section id="categories" className="mx-auto w-[calc(100%-32px)] max-w-[1280px] py-9 md:w-[calc(100%-48px)]">
       <SectionHeader
-        title="Thể loại sách"
-        eyebrow={isLoading ? "Đang tải từ API" : "Khám phá nhanh"}
+        title="Chọn thể loại bạn muốn đọc"
+        eyebrow={isLoading ? "Đang đồng bộ dữ liệu" : "Khám phá nhanh"}
+        description="8 lối vào quen thuộc giúp người mua mới tìm sách nhanh hơn mà không cần mở quá nhiều bộ lọc."
       />
-      <div className="grid grid-flow-col auto-cols-[160px] md:auto-cols-[calc((100%-98px)/8)] gap-3.5 overflow-x-auto pb-4 snap-x snap-proximity no-scrollbar">
-        {categories.map((category) => (
-          <a
-            className="snap-start min-h-[128px] rounded-[22px] border border-border-warm bg-linear-to-b from-white to-surface-warm grid place-items-center text-center p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-amber-300"
-            href={`/books?category=${category.slug}`}
-            key={category.id}
-          >
-            <span className="text-3xl mb-2 block">{category.icon}</span>
-            <strong className="text-espresso font-bold text-sm block">{category.name}</strong>
-          </a>
-        ))}
+      <div className="grid grid-flow-col auto-cols-[164px] gap-4 overflow-x-auto pb-5 snap-x snap-proximity no-scrollbar md:auto-cols-[calc((100%-98px)/8)]">
+        {categories.slice(0, 8).map((category, index) => {
+          const Icon = categoryIcons[index % categoryIcons.length];
+          return (
+            <a
+              className="group glass-panel relative min-h-[142px] snap-start overflow-hidden rounded-[26px] p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-accent/70 hover:shadow-glow"
+              href={`/books?category=${category.slug}`}
+              key={category.id}
+            >
+              <span className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-accent/15 blur-2xl transition-transform duration-500 group-hover:scale-150" />
+              <span className="mx-auto mb-3 grid h-13 w-13 place-items-center rounded-2xl bg-espresso text-white shadow-lg shadow-espresso/15 transition-transform duration-300 group-hover:rotate-3 group-hover:scale-105">
+                <Icon className="h-6 w-6" />
+              </span>
+              <strong className="block text-sm font-extrabold text-espresso">{category.name}</strong>
+              <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary">
+                Xem sách <ChevronRight className="h-3.5 w-3.5" />
+              </span>
+            </a>
+          );
+        })}
       </div>
     </section>
   );
 }
 
 function HeroSection({ banner }: { banner: HomeBanner }) {
+  const title = banner.title || fallbackHero.title;
+  const subtitle = banner.subtitle || fallbackHero.subtitle;
+
   return (
-    <section className="py-14 md:py-16">
-      <div className="max-w-[1280px] w-[calc(100%-48px)] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_520px] items-center gap-12">
+    <section className="relative overflow-hidden py-12 md:py-16">
+      <div className="pointer-events-none absolute left-[6%] top-10 h-52 w-52 rounded-full bg-accent/20 blur-3xl" />
+      <div className="pointer-events-none absolute right-[8%] top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+
+      <div className="relative mx-auto grid w-[calc(100%-32px)] max-w-[1280px] grid-cols-1 items-center gap-10 md:w-[calc(100%-48px)] lg:grid-cols-[1fr_540px]">
         <div className="flex flex-col">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-primary mb-2">BBooks · Warm Premium Bookstore</p>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-[4.9rem] font-bold text-espresso leading-[0.98] tracking-tighter mb-[22px]">
-            {banner.title || fallbackHero.title}
+          <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-accent/25 bg-white/70 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-primary shadow-sm backdrop-blur">
+            <Sparkles className="h-4 w-4 text-accent" /> BBooks · Liquid Glass Bookstore
+          </div>
+          <h1 className="text-balance font-serif text-4xl leading-[1.02] tracking-tight text-espresso md:text-6xl lg:text-[5.35rem]">
+            {title}
           </h1>
-          <p className="text-text-sub max-w-[650px] text-[15px] md:text-[17px] leading-relaxed">
-            {banner.subtitle || fallbackHero.subtitle}
-          </p>
-          <div className="flex gap-3.5 mt-8 flex-wrap">
+          <p className="mt-6 max-w-[660px] text-[15px] leading-8 text-text-sub md:text-lg">{subtitle}</p>
+
+          <div className="mt-8 flex flex-wrap gap-3.5">
             <a
-              className="inline-flex items-center justify-center rounded-full min-h-12 px-6 font-extrabold transition-all duration-200 hover:-translate-y-1 bg-linear-to-br from-accent to-primary-hover text-white shadow-[0_16px_35px_rgba(245,158,11,0.28)]"
+              className="gold-glow inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-linear-to-br from-accent to-primary-hover px-7 font-black text-white transition-all duration-200 hover:-translate-y-1"
               href={banner.linkUrl || "/books"}
             >
-              {banner.buttonText || "Mua sách ngay"}
+              {banner.buttonText || "Mua sách ngay"} <ArrowRight className="h-4 w-4" />
             </a>
             <a
-              className="inline-flex items-center justify-center rounded-full min-h-12 px-6 font-extrabold transition-all duration-200 hover:-translate-y-1 bg-surface border border-border-warm text-espresso"
+              className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-border-warm bg-white/78 px-7 font-extrabold text-espresso shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-1 hover:border-accent"
               href="#categories"
             >
-              Xem danh mục
+              <Search className="h-4 w-4" /> Tìm theo thể loại
             </a>
           </div>
-        </div>
-        <div
-          className="relative overflow-hidden rounded-[32px] min-h-[300px] md:min-h-[420px] shadow-espresso bg-surface"
-          aria-label="Hero banner"
-        >
-          <span className="absolute z-10 top-5 left-5 rounded-full py-2 px-4 bg-white/88 text-sale font-extrabold text-xs md:text-sm">
-            Deal tuần này
-          </span>
-          <img
-            src={banner.imageUrl || fallbackHero.imageUrl}
-            alt={banner.title || "Không gian đọc sách BBooks"}
-            className="w-full h-[300px] md:h-[420px] object-cover"
-          />
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-espresso/45 to-transparent" />
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-            <span className="w-2 h-2 rounded-full bg-white"></span>
-            <span className="w-2 h-2 rounded-full bg-white opacity-50"></span>
-            <span className="w-2 h-2 rounded-full bg-white opacity-50"></span>
+
+          <div className="mt-9 grid max-w-[680px] grid-cols-1 gap-3 sm:grid-cols-3">
+            {[
+              { icon: Truck, title: "Freeship 199K", text: "Giao sách nhanh" },
+              { icon: ShieldCheck, title: "Sách chuẩn", text: "Thông tin rõ ràng" },
+              { icon: BadgePercent, title: "Deal mỗi ngày", text: "Giá tốt dễ thấy" },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title} className="glass-panel rounded-2xl px-4 py-3">
+                  <Icon className="mb-2 h-5 w-5 text-primary" />
+                  <strong className="block text-sm font-black text-espresso">{item.title}</strong>
+                  <span className="text-xs font-medium text-text-sub">{item.text}</span>
+                </div>
+              );
+            })}
           </div>
+        </div>
+
+        <div className="relative">
+          <div className="glass-panel animate-float-book relative overflow-hidden rounded-[36px] p-3">
+            <div className="relative overflow-hidden rounded-[28px] bg-espresso">
+              <img
+                src={banner.imageUrl || fallbackHero.imageUrl}
+                alt={title || "Không gian đọc sách BBooks"}
+                className="h-[330px] w-full object-cover md:h-[470px]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-espresso/78 via-espresso/10 to-transparent" />
+              <div className="absolute left-5 top-5 rounded-full bg-white/90 px-4 py-2 text-xs font-black text-sale shadow-sm backdrop-blur">
+                Deal tuần này
+              </div>
+              <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-white/20 bg-white/16 p-5 text-white backdrop-blur-md">
+                <div className="flex items-center gap-1 text-accent">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Star key={index} className="h-4 w-4 fill-current" />
+                  ))}
+                </div>
+                <p className="mt-2 text-lg font-black">Kệ sách bán chạy được cập nhật liên tục</p>
+                <p className="mt-1 text-sm text-white/75">Dữ liệu lấy từ API, fallback vẫn đẹp khi backend chưa bật.</p>
+              </div>
+            </div>
+          </div>
+          <div className="shimmer-line absolute -bottom-4 left-8 right-8 h-1 overflow-hidden rounded-full bg-espresso/10" />
         </div>
       </div>
     </section>
@@ -129,28 +204,73 @@ function HeroSection({ banner }: { banner: HomeBanner }) {
 }
 
 function MidBanners({ banners }: { banners: HomeBanner[] }) {
-  if (banners.length === 0) return null;
+  const fallbackBanners = useMemo<HomeBanner[]>(
+    () => [
+      {
+        id: -1,
+        title: "Combo sách kỹ năng giảm sâu",
+        subtitle: "Gói đọc 30 ngày cho người muốn xây lại thói quen học tập và làm việc.",
+        imageUrl: "https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=85",
+        linkUrl: "/books?sort=sale",
+        buttonText: "Xem combo",
+        sortOrder: 1,
+      },
+      {
+        id: -2,
+        title: "Góc đọc cuối tuần",
+        subtitle: "Tiểu thuyết, chữa lành và sách thiếu nhi được chọn cho gia đình.",
+        imageUrl: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?auto=format&fit=crop&w=900&q=85",
+        linkUrl: "/books?category=van-hoc",
+        buttonText: "Khám phá",
+        sortOrder: 2,
+      },
+    ],
+    []
+  );
+
+  const visibleBanners = banners.length ? banners.slice(0, 2) : fallbackBanners;
 
   return (
-    <section className="py-4 max-w-[1280px] w-[calc(100%-48px)] mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-      {banners.slice(0, 2).map((banner) => (
+    <section className="mx-auto grid w-[calc(100%-32px)] max-w-[1280px] grid-cols-1 gap-4 py-4 md:w-[calc(100%-48px)] md:grid-cols-2">
+      {visibleBanners.map((banner) => (
         <a
           href={banner.linkUrl || "/books"}
           key={banner.id}
-          className="group relative overflow-hidden rounded-[28px] min-h-[210px] bg-espresso shadow-sm hover:shadow-xl transition-all"
+          className="group relative min-h-[230px] overflow-hidden rounded-[32px] bg-espresso shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-espresso"
         >
-          <img src={banner.imageUrl} alt={banner.title || "BBooks banner"} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          <div className="absolute inset-0 bg-gradient-to-r from-espresso/88 via-espresso/45 to-transparent" />
-          <div className="relative z-10 p-6 max-w-[360px] text-white">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-accent font-extrabold mb-2">Ưu đãi nổi bật</p>
-            <h2 className="font-serif text-2xl font-bold">{banner.title || "BBooks Banner"}</h2>
-            <p className="text-sm text-white/75 mt-2 line-clamp-2">{banner.subtitle || "Khám phá bộ sưu tập sách đang được yêu thích."}</p>
-            <span className="inline-flex mt-5 rounded-full bg-accent px-4 py-2 text-xs font-extrabold text-white">
-              {banner.buttonText || "Khám phá"}
+          <img src={banner.imageUrl} alt={banner.title || "BBooks banner"} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-108" />
+          <div className="absolute inset-0 bg-gradient-to-r from-espresso/92 via-espresso/54 to-transparent" />
+          <div className="relative z-10 max-w-[390px] p-7 text-white">
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-accent">Ưu đãi nổi bật</p>
+            <h2 className="font-serif text-3xl leading-tight">{banner.title || "BBooks Banner"}</h2>
+            <p className="mt-3 line-clamp-2 text-sm leading-6 text-white/76">{banner.subtitle || "Khám phá bộ sưu tập sách đang được yêu thích."}</p>
+            <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-black text-white transition-transform duration-200 group-hover:translate-x-1">
+              {banner.buttonText || "Khám phá"} <ArrowRight className="h-4 w-4" />
             </span>
           </div>
         </a>
       ))}
+    </section>
+  );
+}
+
+function TrustStrip() {
+  return (
+    <section className="mx-auto w-[calc(100%-32px)] max-w-[1280px] py-8 md:w-[calc(100%-48px)]">
+      <div className="glass-panel grid gap-4 rounded-[30px] p-5 md:grid-cols-[1.1fr_0.9fr_0.9fr] md:p-7">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">BBooks Promise</p>
+          <h2 className="mt-2 font-serif text-3xl text-espresso">Mua sách gọn, đẹp và đáng tin.</h2>
+        </div>
+        <div className="rounded-3xl bg-white/70 p-5">
+          <p className="text-3xl font-black text-espresso">30s</p>
+          <p className="mt-1 text-sm leading-6 text-text-sub">Review có chống spam theo kế hoạch, nội dung nhạy cảm được che bằng ****.</p>
+        </div>
+        <div className="rounded-3xl bg-espresso p-5 text-white">
+          <p className="text-3xl font-black text-accent">24/7</p>
+          <p className="mt-1 text-sm leading-6 text-white/72">Giao diện luôn có fallback data để demo mượt ngay cả khi API lỗi.</p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -165,6 +285,18 @@ export function Home() {
     saleBooks: demoBooks.filter((book) => book.originalPrice).concat(demoBooks).slice(0, 5),
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    document.title = "BBooks | Hiệu sách online premium";
+    const description = "BBooks là web bán sách React + Node.js với trải nghiệm mua sách nhanh, giao diện premium và quản trị đầy đủ.";
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content = description;
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -190,7 +322,9 @@ export function Home() {
     }
 
     loadHome();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -200,6 +334,7 @@ export function Home() {
       <BookSlider title="Sách bán chạy" eyebrow={isLoading ? "Đang tải..." : "Được độc giả chọn nhiều"} books={home.bestSellingBooks} />
       <MidBanners banners={home.midBanners} />
       <BookSlider title="Sách mới" eyebrow="Vừa lên kệ" books={home.newBooks} />
+      <TrustStrip />
       <BookSlider title="Sách khuyến mãi" eyebrow="Ưu đãi tốt hôm nay" books={home.saleBooks} />
       <BookSlider title="Gợi ý hôm nay" eyebrow="Dành riêng cho bạn" books={home.bestSellingBooks} />
     </main>
