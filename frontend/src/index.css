@@ -1,0 +1,58 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-espresso: #3B2416;
+  --color-primary: #92400E;
+  --color-primary-hover: #B45309;
+  --color-accent: #F59E0B;
+  --color-accent-soft: #FEF3C7;
+  --color-background-warm: #FEF9F0;
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FFF7ED;
+  --color-text-main: #1C1917;
+  --color-text-sub: #78716C;
+  --color-border-warm: #E7E5E4;
+  --color-sale: #C2410C;
+
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --shadow-espresso: 0 18px 45px rgba(59, 36, 22, 0.11);
+}
+
+@layer base {
+  body {
+    background: radial-gradient(circle at top left, #ffedd5 0, transparent 32rem), #FEF9F0;
+    color: #1C1917;
+    font-family: "Inter", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+}
+
+/* Custom Hide Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

@@ -1,0 +1,1377 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║          KẾ HOẠCH TỔNG THỂ — BBOOKS WEB BÁN SÁCH (React + Node.js)            ║
+║          Scale lớn · Full Admin · Production Ready                              ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MỤC LỤC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. TECH STACK & KIẾN TRÚC HỆ THỐNG
+  2. MÀU SẮC & DESIGN SYSTEM
+  3. UI/LAYOUT — WIREFRAME CÁC TRANG CHÍNH
+  4. SCHEMA DATABASE CHI TIẾT
+  5. CẤU TRÚC THƯ MỤC PROJECT
+  6. API JSON MẪU CHI TIẾT
+  7. LỘ TRÌNH PHÁT TRIỂN (ROADMAP)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. TECH STACK & KIẾN TRÚC HỆ THỐNG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  FRONTEND
+  ─────────────────────────────────────────
+  • React 18 + TypeScript        → Type-safe, dễ bảo trì
+  • Tailwind CSS                 → Styling nhanh, responsive
+  • React Router v6              → Điều hướng trang
+  • Zustand                      → State management (giỏ hàng, user)
+  • React Query (TanStack)       → Data fetching, caching, sync
+  • Axios                        → Gọi API
+  • React Hook Form + Zod        → Form validation
+  • Vite                         → Build tool nhanh
+  • Toast                        → Hiển thị thông báo
+    icon (lucide)
+
+  BACKEND
+  ─────────────────────────────────────────
+  • Node.js + Express.js         → REST API server
+  • TypeScript                   → Type-safe backend
+  • JWT (jsonwebtoken)           → Authentication
+  • Bcrypt                       → Mã hóa mật khẩu
+  • Multer + Cloudinary          → Upload & lưu ảnh bìa sách
+  • Nodemailer                   → Gửi email (xác nhận đơn hàng)
+  • Helmet + CORS                → Bảo mật API
+  • Express Rate Limit           → Chống DDoS
+
+  DATABASE, LƯU ẢNH & TRIỂN KHAI — KẾ HOẠCH DỄ HIỂU CHO NGƯỜI MỚI
+  ─────────────────────────────────────────
+  Mục tiêu: làm dự án chạy tốt trên máy trước, sau đó mới deploy online.
+  Không cần làm VPS, Nginx, Redis, CI/CD ngay từ đầu để tránh bị rối.
+
+  GIAI ĐOẠN 1 — PHÁT TRIỂN TRÊN MÁY CÁ NHÂN (LOCAL)
+  ─────────────────────────────────────────
+  • PostgreSQL + Docker          → Database chạy trên máy để code và test
+  • Prisma ORM                   → Kết nối backend với PostgreSQL, tạo bảng bằng migration
+  • Cloudinary                   → Lưu ảnh bìa sách online, database chỉ lưu URL ảnh
+  • Redis                        → Tạm thời CHƯA cần dùng ở giai đoạn đầu
+
+  Luồng local:
+  [Trình duyệt của bạn]
+       │
+       ▼
+  [React Frontend - chạy localhost]
+       │ gọi API
+       ▼
+  [Express Backend - chạy localhost]
+       │ dùng Prisma
+       ▼
+  [PostgreSQL Docker - database local]
+
+  Ảnh bìa sách:
+  [Admin upload ảnh] → [Backend] → [Cloudinary] → lưu URL vào PostgreSQL
+
+  GIAI ĐOẠN 2 — DEMO ONLINE SAU KHI APP CHẠY ỔN
+  ─────────────────────────────────────────
+  • Vercel                       → Deploy frontend React
+  • Render hoặc Railway          → Deploy backend Node.js / Express
+  • Supabase PostgreSQL          → Database online, dễ dùng cho người mới
+  • Cloudinary                   → Tiếp tục dùng để lưu ảnh bìa sách
+
+  Luồng online đề xuất:
+  [User Browser]
+       │
+       ▼
+  [Frontend trên Vercel]
+       │ gọi API
+       ▼
+  [Backend trên Render/Railway]
+       │ dùng Prisma
+       ▼
+  [Supabase PostgreSQL]
+
+  [Admin Browser]
+       │
+       ▼
+  [Admin Panel trên Vercel] → [Backend /api/admin/*] → [Supabase PostgreSQL]
+                                      (role: ADMIN)
+
+  GIAI ĐOẠN 3 — NÂNG CẤP PRODUCTION SAU NÀY
+  ─────────────────────────────────────────
+  • Redis                        → Cache danh sách sách, danh mục, session nếu cần
+  • Docker + Docker Compose      → Đóng gói frontend, backend, database khi deploy chuyên nghiệp
+  • Nginx                        → Reverse proxy, SSL, serve static files trên VPS
+  • VPS (DigitalOcean / Vultr)   → Hosting riêng khi đã hiểu hệ thống hơn
+  • GitHub Actions               → Tự động test và deploy khi push code
+  • PM2                          → Quản lý tiến trình Node.js nếu deploy không dùng Docker
+
+  Ghi nhớ:
+  • Giai đoạn đầu chỉ cần: React + Express + Prisma + PostgreSQL Docker + Cloudinary.
+  • Khi muốn đưa online: dùng Vercel + Render/Railway + Supabase.
+  • VPS, Nginx, Redis, CI/CD là phần nâng cao, nên làm sau khi MVP đã hoàn thành.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  2. MÀU SẮC & DESIGN SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  UI GUIDELINE CHÍNH THỨC — BBOOKS
+  ─────────────────────────────────────────
+  Định hướng: Clean + Premium E-commerce Bookstore.
+  Giao diện lấy cảm hứng từ web thương mại điện tử như Tiki/Fahasa nhưng tinh gọn,
+  ấm hơn, cao cấp hơn và tập trung vào trải nghiệm mua sách nhanh.
+
+  BRAND
+  ─────────────────────────────────────────
+  Tên dự án     : BBooks
+  Tinh thần     : Tin cậy · Gọn gàng · Ấm áp · Dễ mua · Có chất sách
+  Logo text     : BBooks
+  Tone UI       : Nền kem ấm, card trắng, chữ nâu espresso, CTA vàng amber
+  Không khí     : Hiệu sách hiện đại, không quá màu mè, không giống blog đọc sách
+
+  PALETTE CHÍNH — "Warm Premium Bookstore"
+  ─────────────────────────────────────────
+  Espresso      #3B2416   (Logo, heading, text nhấn mạnh)
+  Primary       #92400E   (Nâu ấm — link chính, trạng thái active)
+  Primary Hover #B45309   (Hover button/link)
+  Accent        #F59E0B   (CTA, rating *****, badge nổi bật)
+  Accent Soft   #FEF3C7   (Nền badge/vùng nhấn nhẹ)
+  Background    #FEF9F0   (Nền trang chính)
+  Surface       #FFFFFF   (Card, modal, bảng, panel)
+  Surface Warm  #FFF7ED   (Khối phụ, hover background nhẹ)
+  Text Main     #1C1917   (Chữ chính)
+  Text Sub      #78716C   (Mô tả, metadata, placeholder)
+  Border        #E7E5E4   (Viền card/input/table)
+  Sale          #C2410C   (Badge giảm giá)
+  Success       #16A34A   (Đặt hàng thành công)
+  Error         #DC2626   (Lỗi, hết hàng)
+  Warning       #D97706   (Sắp hết hàng)
+
+  TYPOGRAPHY
+  ─────────────────────────────────────────
+  Font chính    : 'Inter' hoặc 'Be Vietnam Pro' (Google Fonts)
+  Font tiêu đề  : 'Playfair Display' dùng tiết chế cho hero/heading lớn
+  Font admin    : 'Inter' hoặc 'Be Vietnam Pro' để dễ đọc dữ liệu
+  Font code     : 'JetBrains Mono' nếu cần hiển thị mã/ID trong admin
+
+  H1            : 2.25rem / 700 / line-height 1.2
+  H2            : 1.875rem / 700 / line-height 1.25
+  H3            : 1.5rem / 600 / line-height 1.3
+  Section title : 1.5rem–1.75rem / 700
+  Body          : 1rem / 400 / line-height 1.6
+  Small         : 0.875rem / 400
+  Caption       : 0.75rem / 500
+
+  LAYOUT & SPACING
+  ─────────────────────────────────────────
+  Container max-width : 1280px
+  Gutter             : 16px mobile / 24px tablet / 32px desktop
+  Section padding    : 48px–80px desktop, 32px–48px mobile
+  Card padding       : 16px–24px
+  Border radius      : 16px card, 20px section panel, 999px pill/button nhỏ
+  Shadow             : nhẹ, mềm; hover card nâng nhẹ, không dùng shadow quá gắt
+
+  COMPONENT STYLE
+  ─────────────────────────────────────────
+  Header:
+  • Có promo bar mỏng phía trên nếu cần.
+  • Logo BBooks bên trái.
+  • Search bar lớn ở giữa: "Tìm kiếm sách, tác giả, ISBN...".
+  • Menu: Danh mục, Đơn hàng, Giỏ hàng, Tài khoản.
+  • Danh mục mở mega menu khi hover/click, dữ liệu lấy từ categories.
+
+  Button:
+  • Primary: nền #F59E0B, chữ trắng/nâu đậm, hover #B45309 hoặc đậm hơn.
+  • Secondary: nền trắng, viền #E7E5E4, chữ #3B2416.
+  • CTA chính trên card: gọn, rõ, không quá cao.
+
+  BookCard:
+  • Card trắng, viền mảnh, bo góc mềm, spacing thoáng.
+  • Ảnh bìa rõ, có badge giảm giá nếu original_price > price.
+  • Rating hiển thị dạng text ***** màu amber, không dùng icon sao phức tạp.
+  • Hiển thị: tên sách, tác giả, rating, đã bán, giá, giá gốc, % giảm.
+  • Hover: card nâng nhẹ, hiện nút trái tim ❤ ở góc phải để thêm yêu thích.
+  • Có nút "Thêm vào giỏ" nhưng không làm card bị nặng.
+
+  Slider / Carousel:
+  • Hero là full-width slider có arrows + dots.
+  • Thể loại sách là slider ngang, hiển thị 8 item, mỗi item có icon riêng.
+  • Các list sách trên Home hiển thị 5 BookCard/item mỗi hàng dạng slider.
+  • Góc phải section luôn có link "Xem tất cả".
+  • Arrows nên nhỏ, tinh tế, không che nội dung.
+
+  Category item:
+  • Dùng icon line/soft 3D thống nhất màu warm để tạo điểm nhấn.
+  • 8 item Home: Văn học, Kinh tế, Kỹ năng, Thiếu nhi, Ngoại ngữ,
+    Manga/Comic, Sách giáo khoa, Tất cả danh mục.
+
+  Auth:
+  • Không tạo page riêng /login và /register.
+  • Đăng nhập/Đăng ký mở bằng modal trên cùng layout hiện tại.
+  • Modal có tab Đăng nhập / Đăng ký, nền trắng, overlay tối nhẹ.
+  • Form gọn: email/số điện thoại, mật khẩu, ghi nhớ, quên mật khẩu.
+  • Sau login thành công đóng modal và cập nhật trạng thái user ở header.
+
+  Admin:
+  • Admin dùng cùng brand BBooks nhưng chuyên nghiệp hơn.
+  • Sidebar espresso, active state amber.
+  • Nội dung chính nền ivory/white, bảng rõ, spacing thoáng.
+  • Ưu tiên tính quản trị: tìm kiếm, filter, status badge, pagination, action rõ.
+
+  TRANG HOME ĐÃ CHỐT
+  ─────────────────────────────────────────
+  1. Header
+  2. Hero Slider full-width
+  3. Thể loại sách — slider 8 item có icon
+  4. Sách bán chạy — slider 5 item
+  5. Sách mới — slider 5 item
+  6. Sách khuyến mãi — slider 5 item
+  7. Gợi ý hôm nay — slider 5 item
+  8. Footer
+
+  Ghi chú quan trọng:
+  • Không đặt voucher strip quá lớn ở giữa Home.
+  • Voucher/mã giảm giá nên nằm nhỏ trong hero, sale section, cart/checkout.
+  • UI cần giống web bán hàng thật, không chỉ là landing page giới thiệu sách.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  3. UI/LAYOUT — WIREFRAME CÁC TRANG CHÍNH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  DANH SÁCH PAGE UI CẦN CÓ
+  ─────────────────────────────────────────
+  Mục đích: nhìn nhanh toàn bộ giao diện cần thiết trước khi bắt đầu code.
+
+  USER PAGES — Trang dành cho khách hàng
+  • /                         → Trang chủ: hero slider, danh mục, các slider sách
+  • /books                    → Trang danh sách sách: tìm kiếm, lọc, sort, phân trang
+  • /books/:id                → Trang chi tiết sách: ảnh bìa, giá, mô tả, đánh giá
+  • /cart                     → Giỏ hàng: danh sách sách đã chọn, số lượng, tổng tiền
+  • /checkout                 → Thanh toán: địa chỉ, phương thức thanh toán, xác nhận đơn
+  • /order-success            → Đặt hàng thành công: mã đơn, tổng tiền, hướng dẫn tiếp theo
+  • /profile                  → Hồ sơ cá nhân: thông tin user, đổi mật khẩu, địa chỉ
+  • /my-orders                → Đơn hàng của tôi: danh sách đơn và trạng thái giao hàng
+  • /wishlist                 → Sách yêu thích: các sách user đã lưu
+  • Auth modal                → Đăng nhập / Đăng ký mở dạng modal, không tách page riêng
+  • /404                      → Trang không tìm thấy
+
+  ADMIN PAGES — Trang quản trị
+  • /admin                    → Dashboard: doanh thu, đơn hàng, user mới, sách bán chạy
+  • /admin/books              → Quản lý sách: thêm, sửa, xóa, tìm kiếm, lọc trạng thái
+  • /admin/books/new          → Thêm sách mới
+  • /admin/books/:id/edit     → Sửa thông tin sách
+  • /admin/orders             → Quản lý đơn hàng: xem, lọc, cập nhật trạng thái
+  • /admin/orders/:id         → Chi tiết đơn hàng
+  • /admin/users              → Quản lý người dùng: khóa/mở khóa tài khoản
+  • /admin/categories         → Quản lý danh mục sách
+  • /admin/coupons            → Quản lý mã giảm giá
+  • /admin/banners            → Quản lý banner trang chủ
+  • /admin/reports            → Báo cáo doanh thu
+
+  PAGE NÊN LÀM TRƯỚC CHO MVP
+  • Trang chủ
+  • Danh sách sách
+  • Chi tiết sách
+  • Auth modal Đăng nhập / Đăng ký
+  • Giỏ hàng
+  • Checkout
+  • Đơn hàng của tôi
+  • Admin quản lý sách
+  • Admin quản lý đơn hàng
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  TRANG CHỦ (Homepage)                                           │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ HEADER                                                          │
+  │  [Logo BBooks] [Tìm kiếm sách, tác giả, ISBN...]                │
+  │  [Danh mục ▾] [Đơn hàng] [🛒 Giỏ hàng] [👤 Tài khoản]          │
+  │                                                                 │
+  │  Ghi chú phần Danh mục:                                         │
+  │  - Khi hover/click sẽ mở mega menu danh mục sách.               │
+  │  - Dữ liệu lấy từ bảng categories.                              │
+  │  - Ví dụ: Văn học, Kinh tế, Kỹ năng, Thiếu nhi, Ngoại ngữ,      │
+  │    Manga/Comic, Sách giáo khoa...                               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ HERO SLIDER / CAROUSEL FULL WIDTH                               │
+  │  ┌───────────────────────────────────────────────────────────┐  │
+  │  │  Slide 1: Sale sách hè / CTA "Mua ngay"                  │  │
+  │  │  Slide 2: Sách mới nổi bật                                │  │
+  │  │  Slide 3: Combo sách / Freeship                            │  │
+  │  │  Có nút ← → và dots chuyển slide                           │  │
+  │  └───────────────────────────────────────────────────────────┘  │
+  │  Dữ liệu lấy từ bảng banners với position = HOME_HERO.          │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ THỂ LOẠI SÁCH                                                    │
+  │  Slider ngang, hiển thị 8 item có icon để tạo điểm nhấn.        │
+  │  [Icon Văn học] [Icon Kinh tế] [Icon Kỹ năng] [Icon Thiếu nhi]  │
+  │  [Icon Ngoại ngữ] [Icon Manga] [Icon SGK] [Icon Tất cả]         │
+  │  Góc phải có “Xem tất cả”, có nút ← → khi cần trượt.            │
+  │  Dữ liệu lấy từ bảng categories, sort theo sort_order.          │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ SÁCH BÁN CHẠY                                                    │
+  │  Slider ngang: hiển thị 5 BookCard  → Xem tất cả                │
+  │  Dữ liệu lấy từ books, sort theo sold_count DESC.               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ SÁCH MỚI                                                         │
+  │  Slider ngang: hiển thị 5 BookCard  → Xem tất cả                │
+  │  Dữ liệu lấy từ books, sort theo created_at DESC.               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ SÁCH KHUYẾN MÃI                                                  │
+  │  Slider ngang: hiển thị 5 BookCard  → Xem tất cả                │
+  │  Dữ liệu lấy từ books có original_price > price.                │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ GỢI Ý HÔM NAY                                                    │
+  │  Slider ngang: hiển thị 5 BookCard  → Xem tất cả                │
+  │  Dữ liệu lấy theo rule đề xuất/recommendation.                  │
+  │                                                                 │
+  │  Ghi chú: Không đặt voucher strip quá lớn ở giữa trang home.    │
+  │  Voucher/mã giảm giá nên để nhỏ trong hero, trong mục khuyến    │
+  │  mãi, hoặc dùng ở giỏ hàng/checkout để giao diện gọn hơn.       │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ BOOK CARD GỌN CHO TRANG HOME                                    │
+  │  ┌──────────────┐                                               │
+  │  │   Ảnh sách   │  Hover: hiện nút ❤ ở góc phải để yêu thích    │
+  │  │ Tên sách     │                                               │
+  │  │ Tác giả      │                                               │
+  │  │ *****  Đã bán 1.2k                                           │
+  │  │ 89.000đ  120.000đ  -26%                                      │
+  │  │ [Thêm vào giỏ]                                               │
+  │  └──────────────┘                                               │
+  │  Rating hiển thị dạng ***** màu vàng/amber cho dễ nhìn.         │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ FOOTER                                                          │
+  │  [Về chúng tôi] [Chính sách] [Liên hệ] [Mạng xã hội]           │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  TRANG DANH SÁCH SÁCH (/books)                                  │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ HEADER (như trên)                                               │
+  ├──────────────┬──────────────────────────────────────────────────┤
+  │ SIDEBAR LỌC  │ SORT: [Mới nhất ▾]  Tìm thấy 248 cuốn          │
+  │              │                                                   │
+  │ Danh mục     │ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐           │
+  │ ○ Văn học    │ │ Ảnh  │ │ Ảnh  │ │ Ảnh  │ │ Ảnh  │           │
+  │ ● Khoa học   │ │ bìa  │ │ bìa  │ │ bìa  │ │ bìa  │           │
+  │ ○ Kinh doanh │ │      │ │      │ │      │ │      │           │
+  │              │ │Tên   │ │Tên   │ │Tên   │ │Tên   │           │
+  │ Giá          │ │Tác g.│ │Tác g.│ │Tác g.│ │Tác g.│           │
+  │ [──●──────]  │ │89k   │ │120k  │ │75k   │ │200k  │           │
+  │ 0đ → 500k    │ │[Mua] │ │[Mua] │ │[Mua] │ │[Mua] │           │
+  │              │ └──────┘ └──────┘ └──────┘ └──────┘           │
+  │ Đánh giá     │                                                   │
+  │ ★★★★★       │  (tiếp theo 4 card nữa)                         │
+  │ ★★★★+        │                                                   │
+  │              │  ← 1  2  3 ... 62 →                             │
+  │ Tác giả      │                                                   │
+  │ [Tìm tác giả]│                                                   │
+  └──────────────┴──────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  TRANG CHI TIẾT SÁCH (/books/:id)                               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ HEADER                                                          │
+  ├─────────────────────────────────────────────────────────────────┤
+  │                                                                  │
+  │  ┌──────────────┐   Tên sách (Playfair Display, 2rem)          │
+  │  │              │   Tác giả: Nguyễn Văn A                      │
+  │  │   ẢNH BÌA   │   ★★★★☆ (4.2) · 128 đánh giá                │
+  │  │   320x450px  │                                               │
+  │  │              │   Giá: ~~150.000đ~~  **89.000đ**  (-40%)     │
+  │  │              │                                               │
+  │  │  [Thư viện   │   Danh mục: Văn học > Tiểu thuyết           │
+  │  │   Quốc gia]  │   NXB: Kim Đồng · Năm: 2023 · 320 trang     │
+  │  └──────────────┘                                               │
+  │                       Số lượng: [- 1 +]                        │
+  │                       [🛒 Thêm vào giỏ]  [❤ Yêu thích]       │
+  │                       [⚡ Mua ngay]                             │
+  │                                                                  │
+  │  TABS: [Mô tả] [Thông tin] [Đánh giá(128)]                     │
+  │  ─────────────────────────────────────────────                  │
+  │  Nội dung mô tả sách...                                         │
+  │                                                                  │
+  │  SÁCH LIÊN QUAN                                                  │
+  │  [Card] [Card] [Card] [Card]                                    │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  GIỎ HÀNG (/cart)                                               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ HEADER                                                          │
+  ├──────────────────────────────────────┬──────────────────────────┤
+  │ DANH SÁCH SẢN PHẨM                  │ TÓM TẮT ĐƠN HÀNG        │
+  │                                      │                          │
+  │ ☑ [Ảnh] Tên sách          89.000đ  │ Tạm tính:   267.000đ    │
+  │          Tác giả           [- 1 +]  │ Phí ship:   30.000đ     │
+  │          [Xóa] [Yêu thích]          │ Giảm giá:  -50.000đ     │
+  │ ─────────────────────────────────── │ ──────────────────────── │
+  │ ☑ [Ảnh] Tên sách 2       120.000đ  │ Tổng cộng: 247.000đ     │
+  │          [- 1 +]                    │                          │
+  │                                      │ Mã giảm giá:            │
+  │ ☑ [Ảnh] Tên sách 3        58.000đ  │ [NHAP MA ......] [Áp]   │
+  │          [- 2 +]                    │                          │
+  │                                      │ [THANH TOÁN NGAY →]     │
+  │ ☑ Chọn tất cả (3)                   │                          │
+  └──────────────────────────────────────┴──────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  CHECKOUT (/checkout)                                            │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  Bước 1: Địa chỉ  ──>  Bước 2: Vận chuyển  ──>  Bước 3: TT   │
+  ├──────────────────────────────────────┬──────────────────────────┤
+  │ THÔNG TIN GIAO HÀNG                  │ ĐƠN HÀNG CỦA BẠN        │
+  │                                      │                          │
+  │ Họ tên  [________________]           │ [Ảnh] Tên sách x1       │
+  │ SDT     [________________]           │               89.000đ   │
+  │ Email   [________________]           │ [Ảnh] Tên sách x2       │
+  │ Tỉnh    [Chọn tỉnh... ▾]            │              240.000đ   │
+  │ Quận    [Chọn quận... ▾]            │                          │
+  │ Địa chỉ [________________]           │ Tạm tính:   329.000đ    │
+  │                                      │ Ship:         30.000đ   │
+  │ PHƯƠNG THỨC THANH TOÁN               │ Giảm:        -50.000đ   │
+  │ ● COD (Thu tiền khi nhận)            │ ──────────────────────── │
+  │ ○ VNPay                              │ Tổng:       309.000đ    │
+  │ ○ Momo                               │                          │
+  │ ○ Chuyển khoản                       │ [ĐẶT HÀNG →]            │
+  └──────────────────────────────────────┴──────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  ADMIN PANEL — DASHBOARD (/admin)                               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ [☰ SIDEBAR]  │  Admin — Nguyễn Admin  [🔔] [👤 Profile]       │
+  ├──────────────┼──────────────────────────────────────────────────┤
+  │ 📊 Dashboard │  Tổng quan hôm nay                               │
+  │ 📚 Sách      │  ┌──────────┐ ┌──────────┐ ┌──────────┐         │
+  │ 📦 Đơn hàng  │  │💰 DT     │ │📦 Đơn   │ │👥 User   │         │
+  │ 👥 Users     │  │ 45.2M    │ │   128    │ │   32     │         │
+  │ 🏷 Danh mục  │  │ +12% ↑   │ │  +5% ↑   │ │  mới     │         │
+  │ 🎟 Voucher   │  └──────────┘ └──────────┘ └──────────┘         │
+  │ 📢 Banner    │                                                   │
+  │ ⚙ Cài đặt   │  BIỂU ĐỒ DOANH THU 30 NGÀY                      │
+  │              │  ┌────────────────────────────────────────────┐  │
+  │              │  │  📈 (line chart)                           │  │
+  │              │  └────────────────────────────────────────────┘  │
+  │              │                                                   │
+  │              │  ĐƠN HÀNG MỚI NHẤT              SÁCH BÁN CHẠY  │
+  │              │  #1234 | Nguyễn A | 89k | Chờ   1. Tên sách A  │
+  │              │  #1235 | Trần B   | 245k| Ship  2. Tên sách B  │
+  │              │  #1236 | Lê C     | 50k | Xong  3. Tên sách C  │
+  └──────────────┴──────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  ADMIN — QUẢN LÝ SÁCH (/admin/books)                            │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  [🔍 Tìm sách...]  [Danh mục ▾]  [Trạng thái ▾]  [+ Thêm sách]│
+  │                                                                  │
+  │  ID  │ Ảnh │ Tên sách        │ Giá   │ Tồn  │ Trạng │ Action  │
+  │ ─────┼─────┼─────────────────┼───────┼──────┼───────┼─────────│
+  │  001 │ 🖼  │ Tên sách A     │ 89k   │  45  │ Hiện  │ ✏️ 🗑   │
+  │  002 │ 🖼  │ Tên sách B     │ 120k  │   0  │ Hết   │ ✏️ 🗑   │
+  │  003 │ 🖼  │ Tên sách C     │ 75k   │ 200  │ Hiện  │ ✏️ 🗑   │
+  │                                                                  │
+  │  ← 1  2  3 ... 25 →                                            │
+  └─────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  4. SCHEMA DATABASE CHI TIẾT (PostgreSQL + Prisma)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  BẢNG: users
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  email           VARCHAR(255)  UNIQUE NOT NULL
+  password_hash   VARCHAR(255)  NOT NULL
+  full_name       VARCHAR(150)  NOT NULL
+  phone           VARCHAR(15)
+  avatar_url      TEXT
+  role            ENUM          DEFAULT 'USER'  -- USER | ADMIN | STAFF
+  is_active       BOOLEAN       DEFAULT true
+  email_verified  BOOLEAN       DEFAULT false
+  created_at      TIMESTAMP     DEFAULT now()
+  updated_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: categories
+  ─────────────────────────────────────────
+  id              SERIAL        PRIMARY KEY
+  name            VARCHAR(100)  NOT NULL
+  slug            VARCHAR(100)  UNIQUE NOT NULL
+  description     TEXT
+  parent_id       INT           REFERENCES categories(id)  -- cho phép sub-category
+  image_url       TEXT
+  sort_order      INT           DEFAULT 0
+  is_active       BOOLEAN       DEFAULT true
+  created_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: books
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  title           VARCHAR(300)  NOT NULL
+  slug            VARCHAR(300)  UNIQUE NOT NULL
+  description     TEXT
+  author          VARCHAR(200)  NOT NULL
+  publisher       VARCHAR(200)
+  published_year  INT
+  isbn            VARCHAR(20)   UNIQUE
+  pages           INT
+  language        VARCHAR(50)   DEFAULT 'Tiếng Việt'
+  cover_url       TEXT          -- Cloudinary URL
+  price           DECIMAL(12,0) NOT NULL
+  original_price  DECIMAL(12,0)              -- giá gốc trước giảm
+  stock           INT           DEFAULT 0
+  sold_count      INT           DEFAULT 0
+  view_count      INT           DEFAULT 0
+  avg_rating      DECIMAL(2,1)  DEFAULT 0
+  review_count    INT           DEFAULT 0
+  weight          INT                        -- gram, dùng tính phí ship
+  category_id     INT           REFERENCES categories(id)
+  is_featured     BOOLEAN       DEFAULT false
+  is_active       BOOLEAN       DEFAULT true
+  created_at      TIMESTAMP     DEFAULT now()
+  updated_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: book_images  (nhiều ảnh cho 1 sách)
+  ─────────────────────────────────────────
+  id              SERIAL        PRIMARY KEY
+  book_id         UUID          REFERENCES books(id) ON DELETE CASCADE
+  image_url       TEXT          NOT NULL
+  sort_order      INT           DEFAULT 0
+  created_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: addresses
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  user_id         UUID          REFERENCES users(id) ON DELETE CASCADE
+  full_name       VARCHAR(150)  NOT NULL
+  phone           VARCHAR(15)   NOT NULL
+  province        VARCHAR(100)  NOT NULL
+  district        VARCHAR(100)  NOT NULL
+  ward            VARCHAR(100)  NOT NULL
+  street          TEXT          NOT NULL
+  is_default      BOOLEAN       DEFAULT false
+  created_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: orders
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  order_code      VARCHAR(20)   UNIQUE NOT NULL  -- ORD-20240115-0001
+  user_id         UUID          REFERENCES users(id)
+  status          ENUM          DEFAULT 'PENDING'
+                                -- PENDING | CONFIRMED | SHIPPING | DELIVERED | CANCELLED | REFUNDED
+  payment_method  ENUM          -- COD | VNPAY | MOMO | BANK_TRANSFER
+  payment_status  ENUM          DEFAULT 'UNPAID'  -- UNPAID | PAID | REFUNDED
+  subtotal        DECIMAL(12,0) NOT NULL
+  discount        DECIMAL(12,0) DEFAULT 0
+  shipping_fee    DECIMAL(12,0) DEFAULT 0
+  total           DECIMAL(12,0) NOT NULL
+  coupon_code     VARCHAR(50)
+  note            TEXT
+  -- Địa chỉ giao hàng (copy lúc đặt, không reference để tránh thay đổi sau)
+  shipping_name   VARCHAR(150)  NOT NULL
+  shipping_phone  VARCHAR(15)   NOT NULL
+  shipping_address TEXT         NOT NULL
+  confirmed_at    TIMESTAMP
+  shipped_at      TIMESTAMP
+  delivered_at    TIMESTAMP
+  cancelled_at    TIMESTAMP
+  cancel_reason   TEXT
+  created_at      TIMESTAMP     DEFAULT now()
+  updated_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: order_items
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  order_id        UUID          REFERENCES orders(id) ON DELETE CASCADE
+  book_id         UUID          REFERENCES books(id)
+  book_title      VARCHAR(300)  NOT NULL  -- copy lúc đặt
+  book_cover      TEXT                    -- copy lúc đặt
+  quantity        INT           NOT NULL
+  unit_price      DECIMAL(12,0) NOT NULL  -- giá lúc đặt
+  total_price     DECIMAL(12,0) NOT NULL
+
+  BẢNG: cart_items
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  user_id         UUID          REFERENCES users(id) ON DELETE CASCADE
+  book_id         UUID          REFERENCES books(id) ON DELETE CASCADE
+  quantity        INT           NOT NULL DEFAULT 1
+  created_at      TIMESTAMP     DEFAULT now()
+  updated_at      TIMESTAMP     DEFAULT now()
+  UNIQUE(user_id, book_id)
+
+  BẢNG: wishlists
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  user_id         UUID          REFERENCES users(id) ON DELETE CASCADE
+  book_id         UUID          REFERENCES books(id) ON DELETE CASCADE
+  created_at      TIMESTAMP     DEFAULT now()
+  UNIQUE(user_id, book_id)
+
+  BẢNG: reviews
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  book_id         UUID          REFERENCES books(id) ON DELETE CASCADE
+  user_id         UUID          REFERENCES users(id) ON DELETE CASCADE
+  order_id        UUID          REFERENCES orders(id)  -- chỉ mua mới được review
+  rating          INT           NOT NULL CHECK (rating BETWEEN 1 AND 5)
+  title           VARCHAR(200)
+  content         TEXT
+  is_approved     BOOLEAN       DEFAULT true
+  helpful_count   INT           DEFAULT 0
+  created_at      TIMESTAMP     DEFAULT now()
+  updated_at      TIMESTAMP     DEFAULT now()
+  UNIQUE(book_id, user_id)
+
+  BẢNG: coupons
+  ─────────────────────────────────────────
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid()
+  code            VARCHAR(50)   UNIQUE NOT NULL
+  name            VARCHAR(200)
+  type            ENUM          -- PERCENT | FIXED_AMOUNT | FREE_SHIP
+  value           DECIMAL(12,0) NOT NULL    -- % hoặc số tiền
+  min_order_value DECIMAL(12,0) DEFAULT 0
+  max_discount    DECIMAL(12,0)             -- giảm tối đa (dùng cho %)
+  usage_limit     INT                       -- NULL = không giới hạn
+  used_count      INT           DEFAULT 0
+  start_date      TIMESTAMP
+  end_date        TIMESTAMP
+  is_active       BOOLEAN       DEFAULT true
+  created_at      TIMESTAMP     DEFAULT now()
+
+  BẢNG: banners
+  ─────────────────────────────────────────
+  id              SERIAL        PRIMARY KEY
+  title           VARCHAR(200)
+  subtitle        VARCHAR(300)              -- dòng mô tả ngắn trên banner
+  image_url       TEXT          NOT NULL
+  link_url        TEXT
+  button_text     VARCHAR(50)               -- ví dụ: Mua ngay, Xem thêm
+  position        ENUM          -- HOME_HERO | HOME_MID | CATEGORY_TOP
+  sort_order      INT           DEFAULT 0
+  is_active       BOOLEAN       DEFAULT true
+  start_date      TIMESTAMP
+  end_date        TIMESTAMP
+  created_at      TIMESTAMP     DEFAULT now()
+
+  Ghi chú:
+  - HOME_HERO dùng cho hero slider/carousel ở trang chủ.
+  - sort_order quyết định thứ tự slide.
+  - start_date/end_date giúp tự động bật/tắt banner theo chiến dịch.
+  - Không lưu ảnh trực tiếp trong database, chỉ lưu Cloudinary URL.
+
+  QUAN HỆ GIỮA CÁC BẢNG
+  ─────────────────────────────────────────
+  users         ──< orders        (1 user có nhiều đơn)
+  users         ──< cart_items    (1 user có giỏ hàng)
+  users         ──< wishlists     (1 user có nhiều yêu thích)
+  users         ──< reviews       (1 user review nhiều sách)
+  users         ──< addresses     (1 user có nhiều địa chỉ)
+  categories    ──< books         (1 danh mục có nhiều sách)
+  categories    ──< categories    (self-ref: sub-category)
+  books         ──< order_items   (1 sách trong nhiều đơn)
+  books         ──< cart_items    (1 sách trong nhiều giỏ)
+  books         ──< wishlists
+  books         ──< reviews
+  books         ──< book_images
+  orders        ──< order_items   (1 đơn có nhiều sản phẩm)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  5. CẤU TRÚC THƯ MỤC PROJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  bookstore/
+  ├── 📁 frontend/                        (React App)
+  │   ├── public/
+  │   │   └── favicon.ico
+  │   ├── src/
+  │   │   ├── 📁 assets/                  (ảnh tĩnh, fonts)
+  │   │   ├── 📁 components/              (UI components tái sử dụng)
+  │   │   │   ├── ui/                     (Button, Input, Modal, Badge...)
+  │   │   │   ├── layout/                 (Header, Footer, Sidebar)
+  │   │   │   └── shared/                 (BookCard, StarRating, Pagination)
+  │   │   ├── 📁 pages/                   (Trang người dùng)
+  │   │   │   ├── Home.tsx
+  │   │   │   ├── BookList.tsx
+  │   │   │   ├── BookDetail.tsx
+  │   │   │   ├── Cart.tsx
+  │   │   │   ├── Checkout.tsx
+  │   │   │   ├── OrderSuccess.tsx
+  │   │   │   ├── Profile.tsx
+  │   │   │   ├── MyOrders.tsx
+  │   │   │   ├── Wishlist.tsx
+  │   │   │   ├── Login.tsx
+  │   │   │   ├── Register.tsx
+  │   │   │   └── NotFound.tsx
+  │   │   ├── 📁 admin/                   (Trang Admin)
+  │   │   │   ├── Dashboard.tsx
+  │   │   │   ├── BookManage.tsx
+  │   │   │   ├── BookForm.tsx            (thêm/sửa sách)
+  │   │   │   ├── OrderManage.tsx
+  │   │   │   ├── OrderDetail.tsx
+  │   │   │   ├── UserManage.tsx
+  │   │   │   ├── CategoryManage.tsx
+  │   │   │   ├── CouponManage.tsx
+  │   │   │   ├── BannerManage.tsx
+  │   │   │   └── Reports.tsx
+  │   │   ├── 📁 hooks/                   (Custom hooks)
+  │   │   │   ├── useAuth.ts
+  │   │   │   ├── useCart.ts
+  │   │   │   └── useDebounce.ts
+  │   │   ├── 📁 store/                   (Zustand state)
+  │   │   │   ├── authStore.ts
+  │   │   │   └── cartStore.ts
+  │   │   ├── 📁 services/               (API calls)
+  │   │   │   ├── api.ts                  (axios instance)
+  │   │   │   ├── authService.ts
+  │   │   │   ├── bookService.ts
+  │   │   │   ├── orderService.ts
+  │   │   │   └── adminService.ts
+  │   │   ├── 📁 types/                   (TypeScript interfaces)
+  │   │   │   ├── book.types.ts
+  │   │   │   ├── order.types.ts
+  │   │   │   └── user.types.ts
+  │   │   ├── 📁 utils/                   (Helper functions)
+  │   │   │   ├── formatPrice.ts
+  │   │   │   ├── formatDate.ts
+  │   │   │   └── validators.ts
+  │   │   ├── 📁 routes/
+  │   │   │   ├── AppRouter.tsx
+  │   │   │   ├── ProtectedRoute.tsx      (yêu cầu đăng nhập)
+  │   │   │   └── AdminRoute.tsx          (yêu cầu role ADMIN)
+  │   │   ├── App.tsx
+  │   │   └── main.tsx
+  │   ├── .env
+  │   ├── tailwind.config.js
+  │   ├── vite.config.ts
+  │   └── package.json
+  │
+  ├── 📁 backend/                         (Node.js API)
+  │   ├── src/
+  │   │   ├── 📁 controllers/             (Xử lý request)
+  │   │   │   ├── auth.controller.ts
+  │   │   │   ├── book.controller.ts
+  │   │   │   ├── order.controller.ts
+  │   │   │   ├── cart.controller.ts
+  │   │   │   ├── review.controller.ts
+  │   │   │   ├── user.controller.ts
+  │   │   │   └── admin.controller.ts
+  │   │   ├── 📁 routes/                  (Định nghĩa endpoints)
+  │   │   │   ├── auth.routes.ts
+  │   │   │   ├── book.routes.ts
+  │   │   │   ├── order.routes.ts
+  │   │   │   ├── cart.routes.ts
+  │   │   │   ├── review.routes.ts
+  │   │   │   ├── user.routes.ts
+  │   │   │   └── admin.routes.ts
+  │   │   ├── 📁 middleware/
+  │   │   │   ├── auth.middleware.ts      (verify JWT)
+  │   │   │   ├── admin.middleware.ts     (check ADMIN role)
+  │   │   │   ├── validate.middleware.ts  (validate body)
+  │   │   │   └── upload.middleware.ts    (multer)
+  │   │   ├── 📁 services/               (Business logic)
+  │   │   │   ├── auth.service.ts
+  │   │   │   ├── book.service.ts
+  │   │   │   ├── order.service.ts
+  │   │   │   ├── email.service.ts
+  │   │   │   └── cloudinary.service.ts
+  │   │   ├── 📁 validations/            (Zod schemas)
+  │   │   │   ├── auth.validation.ts
+  │   │   │   ├── book.validation.ts
+  │   │   │   └── order.validation.ts
+  │   │   ├── 📁 utils/
+  │   │   │   ├── response.ts             (chuẩn hóa response)
+  │   │   │   ├── generateCode.ts
+  │   │   │   └── slugify.ts
+  │   │   ├── 📁 config/
+  │   │   │   ├── database.ts             (Prisma client)
+  │   │   │   ├── redis.ts
+  │   │   │   └── cloudinary.ts
+  │   │   └── app.ts                      (Express setup)
+  │   ├── 📁 prisma/
+  │   │   ├── schema.prisma               (database schema)
+  │   │   └── 📁 migrations/
+  │   ├── .env
+  │   └── package.json
+  │
+  ├── 📁 nginx/
+  │   └── nginx.conf
+  ├── docker-compose.yml
+  ├── docker-compose.prod.yml
+  └── README.md
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  6. API JSON MẪU CHI TIẾT TỪNG ENDPOINT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  RESPONSE FORMAT CHUẨN (tất cả API đều trả về dạng này)
+  ─────────────────────────────────────────
+  Thành công:
+  {
+    "success": true,
+    "message": "Thông báo",
+    "data": { ... },          // hoặc [ ... ]
+    "meta": {                 // chỉ có khi phân trang
+      "page": 1,
+      "limit": 20,
+      "total": 248,
+      "totalPages": 13
+    }
+  }
+
+  Lỗi:
+  {
+    "success": false,
+    "message": "Mô tả lỗi",
+    "errors": [               // chỉ có khi validation lỗi
+      { "field": "email", "message": "Email không hợp lệ" }
+    ]
+  }
+
+  ──────────────────────────────────────────────────
+  AUTH ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  POST /api/auth/register
+  Request body:
+  {
+    "full_name": "Nguyễn Văn A",
+    "email": "user@gmail.com",
+    "password": "Password123!",
+    "phone": "0901234567"
+  }
+  Response 201:
+  {
+    "success": true,
+    "message": "Đăng ký thành công",
+    "data": {
+      "user": {
+        "id": "uuid...",
+        "full_name": "Nguyễn Văn A",
+        "email": "user@gmail.com",
+        "role": "USER",
+        "created_at": "2024-01-15T10:30:00Z"
+      },
+      "tokens": {
+        "access_token": "eyJhbGci...",
+        "refresh_token": "eyJhbGci...",
+        "expires_in": 900
+      }
+    }
+  }
+
+  POST /api/auth/login
+  Request body:
+  {
+    "email": "user@gmail.com",
+    "password": "Password123!"
+  }
+  Response 200: (cấu trúc tương tự register)
+
+  POST /api/auth/refresh
+  Request body: { "refresh_token": "eyJhbGci..." }
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "access_token": "eyJhbGci...",
+      "expires_in": 900
+    }
+  }
+
+  POST /api/auth/logout
+  Header: Authorization: Bearer <access_token>
+  Response 200: { "success": true, "message": "Đăng xuất thành công" }
+
+  ──────────────────────────────────────────────────
+  HOME ENDPOINT
+  ──────────────────────────────────────────────────
+
+  GET /api/home
+  Mục đích: Frontend gọi 1 lần để lấy toàn bộ dữ liệu cần hiển thị trang chủ.
+
+  Dữ liệu lấy từ database:
+  • heroBanners       → bảng banners, position = HOME_HERO, is_active = true
+  • categories        → bảng categories, is_active = true, sort theo sort_order
+  • bestSellingBooks  → bảng books, sort theo sold_count DESC
+  • newBooks          → bảng books, sort theo created_at DESC
+  • saleBooks         → bảng books, điều kiện original_price > price
+
+  Response 200:
+  {
+    "success": true,
+    "message": "Lấy dữ liệu trang chủ thành công",
+    "data": {
+      "heroBanners": [
+        {
+          "id": 1,
+          "title": "Ưu đãi sách chọn lọc đến 50%",
+          "subtitle": "Khám phá những đầu sách đáng đọc nhất hôm nay",
+          "image_url": "https://res.cloudinary.com/.../hero-sale.jpg",
+          "link_url": "/books?sale=true",
+          "button_text": "Mua ngay",
+          "sort_order": 1
+        }
+      ],
+      "categories": [
+        {
+          "id": 1,
+          "name": "Văn học",
+          "slug": "van-hoc",
+          "image_url": "https://res.cloudinary.com/.../category-van-hoc.png"
+        }
+      ],
+      "bestSellingBooks": [
+        {
+          "id": "uuid...",
+          "title": "Nhà Giả Kim",
+          "slug": "nha-gia-kim",
+          "author": "Paulo Coelho",
+          "cover_url": "https://res.cloudinary.com/.../nha-gia-kim.jpg",
+          "price": 89000,
+          "original_price": 120000,
+          "discount_percent": 26,
+          "avg_rating": 4.8,
+          "review_count": 234,
+          "sold_count": 1502
+        }
+      ],
+      "newBooks": [
+        { "id": "uuid...", "title": "Sách mới A", "price": 99000 }
+      ],
+      "saleBooks": [
+        { "id": "uuid...", "title": "Sách khuyến mãi A", "price": 69000, "original_price": 120000 }
+      ]
+    }
+  }
+
+  Ghi chú xử lý backend:
+  • bestSellingBooks: WHERE is_active = true ORDER BY sold_count DESC LIMIT 10
+  • newBooks: WHERE is_active = true ORDER BY created_at DESC LIMIT 10
+  • saleBooks: WHERE is_active = true AND original_price > price LIMIT 10
+  • categories: WHERE is_active = true ORDER BY sort_order ASC
+  • heroBanners: WHERE is_active = true AND position = HOME_HERO ORDER BY sort_order ASC
+
+  ──────────────────────────────────────────────────
+  BOOKS ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  GET /api/books
+  Query params: page=1 & limit=20 & category=van-hoc & search=harry & sort=newest
+                min_price=0 & max_price=500000 & rating=4
+  Response 200:
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "uuid...",
+        "title": "Harry Potter và Hòn Đá Phù Thủy",
+        "slug": "harry-potter-va-hon-da-phu-thuy",
+        "author": "J.K. Rowling",
+        "cover_url": "https://res.cloudinary.com/.../cover.jpg",
+        "price": 89000,
+        "original_price": 150000,
+        "discount_percent": 41,
+        "avg_rating": 4.8,
+        "review_count": 234,
+        "sold_count": 1502,
+        "stock": 45,
+        "is_featured": false,
+        "category": {
+          "id": 1,
+          "name": "Văn học",
+          "slug": "van-hoc"
+        }
+      }
+    ],
+    "meta": {
+      "page": 1,
+      "limit": 20,
+      "total": 248,
+      "totalPages": 13
+    }
+  }
+
+  GET /api/books/:id
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "id": "uuid...",
+      "title": "Harry Potter và Hòn Đá Phù Thủy",
+      "slug": "harry-potter-va-hon-da-phu-thuy",
+      "description": "Tiểu thuyết fantasy...",
+      "author": "J.K. Rowling",
+      "publisher": "NXB Trẻ",
+      "published_year": 2023,
+      "isbn": "978-604-1-21234-5",
+      "pages": 348,
+      "language": "Tiếng Việt",
+      "cover_url": "https://res.cloudinary.com/.../cover.jpg",
+      "images": [
+        "https://res.cloudinary.com/.../img1.jpg",
+        "https://res.cloudinary.com/.../img2.jpg"
+      ],
+      "price": 89000,
+      "original_price": 150000,
+      "discount_percent": 41,
+      "stock": 45,
+      "sold_count": 1502,
+      "avg_rating": 4.8,
+      "review_count": 234,
+      "weight": 350,
+      "category": { "id": 1, "name": "Văn học", "slug": "van-hoc" },
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  }
+
+  POST /api/books (Admin only)
+  Header: Authorization: Bearer <admin_token>
+  Request body (multipart/form-data):
+  {
+    "title": "Tên sách mới",
+    "author": "Tác giả",
+    "publisher": "NXB Trẻ",
+    "published_year": 2024,
+    "price": 100000,
+    "original_price": 130000,
+    "stock": 100,
+    "category_id": 1,
+    "description": "Mô tả sách...",
+    "cover": <file>,          // ảnh bìa upload
+    "pages": 300,
+    "weight": 280
+  }
+  Response 201: { "success": true, "data": { ...book } }
+
+  ──────────────────────────────────────────────────
+  CART ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  GET /api/cart
+  Header: Authorization: Bearer <access_token>
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "items": [
+        {
+          "id": "uuid...",
+          "book": {
+            "id": "uuid...",
+            "title": "Harry Potter",
+            "cover_url": "...",
+            "price": 89000,
+            "stock": 45
+          },
+          "quantity": 2,
+          "item_total": 178000
+        }
+      ],
+      "summary": {
+        "item_count": 3,
+        "subtotal": 267000
+      }
+    }
+  }
+
+  POST /api/cart
+  Request body: { "book_id": "uuid...", "quantity": 1 }
+  Response 200: { "success": true, "message": "Đã thêm vào giỏ hàng" }
+
+  PATCH /api/cart/:bookId
+  Request body: { "quantity": 3 }
+  Response 200: { "success": true, "data": { ...updated_item } }
+
+  DELETE /api/cart/:bookId
+  Response 200: { "success": true, "message": "Đã xóa khỏi giỏ hàng" }
+
+  ──────────────────────────────────────────────────
+  ORDERS ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  POST /api/orders
+  Request body:
+  {
+    "shipping_address_id": "uuid...",   // địa chỉ đã lưu, HOẶC
+    "shipping_name": "Nguyễn Văn A",   // nhập trực tiếp
+    "shipping_phone": "0901234567",
+    "shipping_address": "123 Nguyễn Huệ, P1, Q1, TP.HCM",
+    "payment_method": "COD",
+    "coupon_code": "SALE50K",
+    "note": "Giao giờ hành chính",
+    "items": [
+      { "book_id": "uuid...", "quantity": 2 },
+      { "book_id": "uuid...", "quantity": 1 }
+    ]
+  }
+  Response 201:
+  {
+    "success": true,
+    "message": "Đặt hàng thành công",
+    "data": {
+      "order_id": "uuid...",
+      "order_code": "ORD-20240115-0042",
+      "total": 247000,
+      "payment_method": "COD",
+      "status": "PENDING",
+      "estimated_delivery": "2024-01-18"
+    }
+  }
+
+  GET /api/orders/my
+  Query: page=1 & status=DELIVERED
+  Response 200:
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "uuid...",
+        "order_code": "ORD-20240115-0042",
+        "status": "DELIVERED",
+        "total": 247000,
+        "item_count": 3,
+        "created_at": "2024-01-15T10:30:00Z",
+        "delivered_at": "2024-01-18T14:00:00Z",
+        "items_preview": [
+          { "cover_url": "...", "title": "Harry Potter" }
+        ]
+      }
+    ],
+    "meta": { ... }
+  }
+
+  GET /api/orders/my/:orderId
+  Response 200: (chi tiết đơn hàng đầy đủ với items)
+
+  PATCH /api/orders/my/:orderId/cancel
+  Request body: { "reason": "Tôi muốn đổi địa chỉ" }
+  Response 200: { "success": true, "message": "Đã hủy đơn hàng" }
+
+  ──────────────────────────────────────────────────
+  REVIEWS ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  GET /api/reviews/:bookId
+  Query: page=1 & rating=5
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "summary": {
+        "avg_rating": 4.8,
+        "total": 234,
+        "distribution": { "5": 180, "4": 40, "3": 10, "2": 3, "1": 1 }
+      },
+      "reviews": [
+        {
+          "id": "uuid...",
+          "rating": 5,
+          "title": "Sách rất hay!",
+          "content": "Tôi đã đọc xong trong 2 ngày...",
+          "user": { "full_name": "Nguyễn V***", "avatar_url": "..." },
+          "helpful_count": 12,
+          "created_at": "2024-01-10T08:00:00Z"
+        }
+      ]
+    },
+    "meta": { ... }
+  }
+
+  POST /api/reviews
+  Request body:
+  {
+    "book_id": "uuid...",
+    "order_id": "uuid...",
+    "rating": 5,
+    "title": "Sách rất hay!",
+    "content": "Tôi đã đọc xong trong 2 ngày..."
+  }
+  Response 201: { "success": true, "message": "Cảm ơn bạn đã đánh giá!" }
+
+  ──────────────────────────────────────────────────
+  COUPONS ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  POST /api/coupons/validate
+  Request body:
+  {
+    "code": "SALE50K",
+    "order_value": 200000
+  }
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "code": "SALE50K",
+      "type": "FIXED_AMOUNT",
+      "discount_value": 50000,
+      "message": "Giảm 50.000đ cho đơn từ 150.000đ"
+    }
+  }
+  Response 400 (không hợp lệ):
+  {
+    "success": false,
+    "message": "Mã giảm giá đã hết hạn"
+  }
+
+  ──────────────────────────────────────────────────
+  ADMIN ENDPOINTS
+  ──────────────────────────────────────────────────
+
+  GET /api/admin/dashboard
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "today": {
+        "revenue": 45200000,
+        "orders": 128,
+        "new_users": 32
+      },
+      "this_month": {
+        "revenue": 820000000,
+        "orders": 2840,
+        "revenue_growth": 12.5
+      },
+      "revenue_chart": [
+        { "date": "2024-01-01", "revenue": 25000000, "orders": 89 },
+        { "date": "2024-01-02", "revenue": 31000000, "orders": 102 }
+      ],
+      "top_books": [
+        { "id": "uuid...", "title": "Harry Potter", "sold": 502, "revenue": 44678000 }
+      ],
+      "recent_orders": [ ... ]
+    }
+  }
+
+  GET /api/admin/orders
+  Query: page=1 & status=PENDING & search=ORD-2024
+  Response 200: (danh sách đơn hàng đầy đủ cho admin)
+
+  PATCH /api/admin/orders/:id/status
+  Request body: { "status": "CONFIRMED", "note": "Đã xác nhận" }
+  Response 200: { "success": true, "data": { ...updated_order } }
+
+  GET /api/admin/users
+  Query: page=1 & search=nguyen & role=USER
+  Response 200: (danh sách user)
+
+  PATCH /api/admin/users/:id/status
+  Request body: { "is_active": false }
+  Response 200: { "success": true, "message": "Đã khóa tài khoản" }
+
+  GET /api/admin/reports/revenue
+  Query: from=2024-01-01 & to=2024-01-31 & group_by=day
+  Response 200:
+  {
+    "success": true,
+    "data": {
+      "total_revenue": 820000000,
+      "total_orders": 2840,
+      "avg_order_value": 288732,
+      "chart": [
+        { "period": "2024-01-01", "revenue": 25000000, "orders": 89 }
+      ]
+    }
+  }
+
+  ──────────────────────────────────────────────────
+  AUTHENTICATION HEADER (cho các route cần đăng nhập)
+  ──────────────────────────────────────────────────
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+  HTTP STATUS CODES SỬ DỤNG
+  200 OK             → Thành công
+  201 Created        → Tạo mới thành công
+  400 Bad Request    → Dữ liệu không hợp lệ
+  401 Unauthorized   → Chưa đăng nhập / token hết hạn
+  403 Forbidden      → Không có quyền (không phải admin)
+  404 Not Found      → Không tìm thấy
+  409 Conflict       → Trùng lặp (email đã tồn tại)
+  422 Unprocessable  → Validation failed
+  429 Too Many Req.  → Rate limit
+  500 Server Error   → Lỗi server
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  7. LỘ TRÌNH PHÁT TRIỂN (ROADMAP 8 TUẦN)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  TUẦN 1–2: NỀN TẢNG
+  ─────────────────────────────────────────
+  □ Setup monorepo (frontend + backend trong 1 repo)
+  □ Cài đặt Docker Compose (Node, PostgreSQL, Redis)
+  □ Thiết kế schema Prisma, chạy migration lần đầu
+  □ Auth API: đăng ký, đăng nhập, refresh token, logout
+  □ Middleware: verifyToken, adminOnly, errorHandler
+  □ CRUD Books API (admin): tạo, sửa, xóa, list
+  □ Upload ảnh lên Cloudinary (multer middleware)
+  □ Frontend: setup Vite + React + Tailwind + Router
+  □ Layout cơ bản: Header, Footer, trang chủ skeleton
+  □ Trang đăng nhập / đăng ký có form validation
+
+  TUẦN 3–4: CORE FEATURES
+  ─────────────────────────────────────────
+  □ API danh sách sách: lọc, tìm kiếm, phân trang, sort
+  □ API chi tiết sách + sách liên quan
+  □ Frontend trang danh sách sách + sidebar lọc
+  □ Frontend trang chi tiết sách
+  □ Giỏ hàng: backend API + frontend UI
+  □ Zustand store cho cart + auth
+  □ Wishlist API + UI
+  □ Trang checkout (form địa chỉ, chọn thanh toán)
+  □ API tạo đơn hàng (kiểm tra tồn kho, tính tổng)
+  □ Trang xem đơn hàng của tôi
+  □ Email xác nhận đơn hàng (Nodemailer)
+
+  TUẦN 5–6: ADMIN & UX
+  ─────────────────────────────────────────
+  □ Admin layout: sidebar + dashboard
+  □ Dashboard: biểu đồ doanh thu (Recharts)
+  □ Admin quản lý sách: bảng + thêm/sửa/xóa
+  □ Admin quản lý đơn hàng: list + cập nhật trạng thái
+  □ Admin quản lý user: list + lock/unlock
+  □ Admin quản lý danh mục (CRUD)
+  □ Hệ thống Coupon (tạo, validate, thống kê)
+  □ Admin quản lý Banner
+  □ Review sách (submit + hiển thị + admin duyệt)
+  □ Cải thiện UX: loading skeleton, toast notifications
+  □ Responsive mobile
+
+  TUẦN 7–8: PRODUCTION READY
+  ─────────────────────────────────────────
+  □ Tích hợp VNPay hoặc Momo (thanh toán online)
+  □ Redis cache cho danh sách sách, categories
+  □ Tối ưu SEO: meta tags, OG tags, sitemap.xml
+  □ Lazy loading ảnh + code splitting
+  □ Rate limiting + Helmet security headers
+  □ Unit tests cho các service quan trọng
+  □ Viết Dockerfile cho frontend và backend
+  □ Nginx config: proxy pass + serve static
+  □ Setup GitHub Actions CI/CD
+  □ Deploy lên VPS, cấu hình SSL (Let's Encrypt)
+  □ Monitoring: PM2 logs, uptime check
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  GỢI Ý BƯỚC TIẾP THEO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Bắt đầu từ backend: chạy "npm init" trong /backend, cài đặt
+     express + prisma + typescript, thiết kế schema.prisma
+
+  2. Test API bằng Postman hoặc Thunder Client (VS Code extension)
+
+  3. Frontend sau: chạy "npm create vite@latest frontend -- --template react-ts"
+
+  4. Dùng React Query để gọi API — tránh dùng useEffect cho data fetching
+
+  5. Khi deploy: dùng Railway.app để deploy miễn phí/rẻ trước khi mua VPS
+
+  Hỏi tôi nếu cần code mẫu cụ thể cho bất kỳ phần nào!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Tài liệu này được tạo cho dự án Web Bán Sách — React + Node.js
+  Cập nhật: 2026 · Phiên bản 1.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
