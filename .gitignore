@@ -27,3 +27,6 @@ Thumbs.db
 
 # Prisma generated client
 backend/src/generated/prisma/
+
+# Local agent skills/customizations (do not commit)
+.agents/
