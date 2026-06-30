@@ -8,6 +8,6 @@ cartRouter.use(requireAuth);
 
 cartRouter.get("/", getCart);
 cartRouter.post("/", addToCart);
+cartRouter.delete("/", clearCart);
 cartRouter.put("/:id", updateCartItem);
 cartRouter.delete("/:id", removeFromCart);
-cartRouter.delete("/", clearCart);

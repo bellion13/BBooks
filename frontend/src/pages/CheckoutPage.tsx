@@ -4,6 +4,7 @@ import { useCartStore } from "../store/useCartStore";
 import { useAuth } from "../store/AuthContext";
 import { useAuthModalStore } from "../store/useAuthModalStore";
 import { useToastStore } from "../store/useToastStore";
+import { createOrder, type ApiPaymentMethod } from "../services/api";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { formatPrice } from "../utils/formatPrice";
@@ -44,7 +45,7 @@ export function CheckoutPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const openAuth = useAuthModalStore((s) => s.open);
-  const { items, getTotalPrice, clearCart } = useCartStore();
+  const { items, getTotalPrice, fetchCart } = useCartStore();
   const { show: showToast } = useToastStore();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
@@ -134,9 +135,18 @@ export function CheckoutPage() {
 
     setLoading(true);
     try {
-      // Simulate order API call
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      await clearCart();
+      const normalizedPaymentMethod: ApiPaymentMethod = paymentMethod === "bank" ? "BANK_TRANSFER" : "COD";
+      const shippingAddress = [address.trim(), city.trim()].filter(Boolean).join(", ");
+
+      await createOrder({
+        paymentMethod: normalizedPaymentMethod,
+        shippingName: fullName.trim(),
+        shippingPhone: phone.trim(),
+        shippingAddress,
+        note: note.trim() || undefined,
+      });
+
+      await fetchCart();
       setOrderPlaced(true);
       showToast("Đặt hàng thành công! Chúng tôi sẽ liên hệ sớm nhất.", "success");
     } catch (err: any) {

@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
 
 export type ApiResponse<T> = {
   success: boolean;
@@ -296,6 +296,65 @@ export async function removeFromCart(id: string) {
 export async function clearCart() {
   return request<void>("/cart", {
     method: "DELETE",
+  });
+}
+
+export type ApiOrderStatus = "PENDING" | "CONFIRMED" | "SHIPPING" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+export type ApiPaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
+export type ApiPaymentMethod = "COD" | "BANK_TRANSFER";
+
+export type ApiOrderItem = {
+  id: string;
+  bookId: string | null;
+  bookTitle: string;
+  bookCover: string | null;
+  quantity: number;
+  unitPrice: string;
+  totalPrice: string;
+};
+
+export type ApiOrder = {
+  id: string;
+  orderCode: string;
+  status: ApiOrderStatus;
+  paymentMethod: ApiPaymentMethod;
+  paymentStatus: ApiPaymentStatus;
+  subtotal: string;
+  discount: string;
+  shippingFee: string;
+  total: string;
+  note: string | null;
+  shippingName: string;
+  shippingPhone: string;
+  shippingAddress: string;
+  cancelReason?: string | null;
+  cancelledAt?: string | null;
+  createdAt: string;
+  items: ApiOrderItem[];
+};
+
+export type CreateOrderPayload = {
+  paymentMethod: ApiPaymentMethod;
+  shippingName: string;
+  shippingPhone: string;
+  shippingAddress: string;
+  note?: string;
+};
+
+export async function createOrder(body: CreateOrderPayload) {
+  return request<ApiOrder>("/orders", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getMyOrders() {
+  return request<ApiOrder[]>("/orders");
+}
+
+export async function cancelMyOrder(id: string) {
+  return request<ApiOrder>(`/orders/${id}/cancel`, {
+    method: "PATCH",
   });
 }
 

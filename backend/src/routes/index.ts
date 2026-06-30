@@ -3,6 +3,7 @@ import { authRouter } from "./auth.routes.js";
 import { bookRouter } from "./book.routes.js";
 import { categoryRouter } from "./category.routes.js";
 import { cartRouter } from "./cart.routes.js";
+import { orderRouter } from "./order.routes.js";
 import { wishlistRouter } from "./wishlist.routes.js";
 import { adminRouter } from "./admin.routes.js";
 import { homeRouter } from "./home.routes.js";
@@ -22,6 +23,7 @@ apiRouter.use("/auth", authRouter);
 apiRouter.use("/books", bookRouter);
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/cart", cartRouter);
+apiRouter.use("/orders", orderRouter);
 apiRouter.use("/wishlist", wishlistRouter);
 apiRouter.use("/admin", adminRouter);
 
