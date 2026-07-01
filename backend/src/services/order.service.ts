@@ -1,4 +1,5 @@
-﻿import { prisma } from "../config/database.js";
+import { prisma } from "../config/database.js";
+import { sendOrderConfirmationEmail } from "./email.service.js";
 
 type PaymentMethodInput = "COD" | "BANK_TRANSFER";
 
@@ -76,7 +77,7 @@ export async function createOrderFromCart(userId: string, data: CreateOrderInput
     throw createNamedError("Phương thức thanh toán chưa được hỗ trợ");
   }
 
-  return prisma.$transaction(async (tx) => {
+  const order = await prisma.$transaction(async (tx) => {
     const cartItems = await tx.cartItem.findMany({
       where: { userId },
       include: { book: true },
@@ -149,6 +150,15 @@ export async function createOrderFromCart(userId: string, data: CreateOrderInput
     await tx.cartItem.deleteMany({ where: { userId } });
     return order;
   });
+
+  sendOrderConfirmationEmail(order).catch((error) => {
+    console.warn("[mail] Failed to send order confirmation email", {
+      orderCode: order.orderCode,
+      error: error instanceof Error ? error.message : error,
+    });
+  });
+
+  return order;
 }
 
 export async function getMyOrders(userId: string) {
